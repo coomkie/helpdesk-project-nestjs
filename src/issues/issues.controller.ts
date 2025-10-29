@@ -19,6 +19,7 @@ export class IssuesController {
         @Query('page') page = 1,
         @Query('pageSize') pageSize = 10,
         @Query('search') search?: string,
+        @Query('userId') userId?: string,
         @Query('status') status?: IssueStatus,
         @Query('sortBy') sortBy: keyof Issues = 'created_at',
         @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
@@ -27,6 +28,7 @@ export class IssuesController {
             page: Number(page),
             pageSize: Number(pageSize),
             search,
+            userId,
             status,
             sortBy,
             sortOrder,
@@ -37,6 +39,12 @@ export class IssuesController {
     @UseGuards(JwtAuthGuard)
     findOne(@Param('id') id: string) {
         return this.issuesService.getIssueById(id);
+    }
+
+    @Get('user/:userId')
+    @UseGuards(JwtAuthGuard)
+    getIssuesByUserId(@Param('userId') userId: string) {
+        return this.issuesService.getIssuesByUserId(userId);
     }
 
     @Post()

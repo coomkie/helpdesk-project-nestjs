@@ -3,10 +3,10 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {Users} from "./users.entity";
 import {Like, Repository} from "typeorm";
 import {PaginationUserResponse} from "./dto/response/pagination-user-response";
-import {UserResponse} from "./dto/response/user-response";
 import {CreateUserRequest} from "./dto/request/create-user-request";
 import {UpdateUserRequest} from "./dto/request/update-user-request";
 import {AuthService} from "../auth/auth.service";
+import {UserShortResponse} from "./dto/response/user-short-response";
 
 @Injectable()
 export class UsersService {
@@ -44,7 +44,7 @@ export class UsersService {
             take: pageSize,
             relations: ['issues', 'issues.user']
         });
-        const items = entities.map(e => new UserResponse(e));
+        const items = entities.map(e => new UserShortResponse(e));
         const totalPages = Math.ceil(totalItems / pageSize);
 
         return {
@@ -93,7 +93,13 @@ export class UsersService {
         }
         if (models.username) user.username = models.username;
         if (models.email) user.email = models.email;
-        return this.usersRepository.save(user);
+
+        const result = await this.usersRepository.save(user);
+        if (result) {
+            result.updated_at = new Date();
+            await this.usersRepository.save(result);
+        }
+        return result;
     }
 
     async deleteUser(id: string) {

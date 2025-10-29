@@ -19,7 +19,7 @@ import {ConfigModule} from '@nestjs/config';
             password: '123456',
             database: 'helpdesk',
             autoLoadEntities: true,
-            synchronize: true,
+            synchronize: false,
         }),
         IssuesModule,
         UsersModule,

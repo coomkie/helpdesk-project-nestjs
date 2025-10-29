@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards} from '@nestjs/common';
 import {UsersService} from "./users.service";
 import {Users} from "./users.entity";
 import {UpdateUserRequest} from "./dto/request/update-user-request";
@@ -34,12 +34,6 @@ export class UsersController {
             sortBy,
             sortOrder,
         });
-    }
-
-    @Get('profile')
-    @UseGuards(JwtAuthGuard)
-    getProfile(@Req() req: any) {
-        return req.user;
     }
 
     @Get(':id')

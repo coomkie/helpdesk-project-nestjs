@@ -1,7 +1,8 @@
 import {UserResponse} from "./user-response";
+import {UserShortResponse} from "./user-short-response";
 
 export class PaginationUserResponse {
-    items: UserResponse[];
+    items: UserShortResponse[];
     totalItems: number;
     currentPage: number;
     pageSize: number;

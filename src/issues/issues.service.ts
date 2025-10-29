@@ -23,6 +23,7 @@ export class IssuesService {
         page?: number;
         pageSize?: number;
         search?: string;
+        userId?: string,
         status?: IssueStatus;
         sortBy?: keyof Issues;
         sortOrder?: 'ASC' | 'DESC';
@@ -31,6 +32,7 @@ export class IssuesService {
             page = 1,
             pageSize = 10,
             search,
+            userId,
             status,
             sortBy = 'created_at',
             sortOrder = 'DESC',
@@ -43,7 +45,9 @@ export class IssuesService {
         if (status) {
             where.status = status;
         }
-
+        if (userId) {
+            where.user = {id: userId};
+        }
         const [entities, totalItems] = await this.issuesRepository.findAndCount({
             where,
             order: {[sortBy]: sortOrder},
@@ -76,6 +80,25 @@ export class IssuesService {
         return new IssueResponse(issue);
     }
 
+    async getIssuesByUserId(userId: string) {
+        const user = await this.usersRepository.findOneBy({id: userId});
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        const issues = await this.issuesRepository.find({
+            where: {user: {id: userId}},
+            relations: ['user'],
+        });
+
+        if (issues.length === 0) {
+            throw new NotFoundException('No issues found for this user');
+        }
+
+        return issues.map(issue => new IssueResponse(issue));
+    }
+
+
     async createIssue(data: Partial<CreateIssueRequest>) {
         const user = await this.usersRepository.findOneBy({id: data.userId});
         if (!user) {
@@ -95,7 +118,12 @@ export class IssuesService {
             throw new NotFoundException(`No ${id} issue found`);
         }
         issue.status = model.status;
-        return this.issuesRepository.save(issue);
+        const result = await this.issuesRepository.save(issue);
+        if (result) {
+            issue.updated_at = new Date();
+            await this.issuesRepository.save(issue);
+        }
+        return result;
     }
 
     async deleteIssue(id: string) {
