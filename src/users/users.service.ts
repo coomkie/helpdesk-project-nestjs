@@ -6,7 +6,6 @@ import {PaginationUserResponse} from "./dto/response/pagination-user-response";
 import {UserResponse} from "./dto/response/user-response";
 import {CreateUserRequest} from "./dto/request/create-user-request";
 import {UpdateUserRequest} from "./dto/request/update-user-request";
-import {JwtService} from "@nestjs/jwt";
 import {AuthService} from "../auth/auth.service";
 
 @Injectable()
@@ -59,22 +58,11 @@ export class UsersService {
 
     async getUserById(id: string) {
         const user = await this.usersRepository.findOne({
-            where: {id},
+            where: {id, isAdmin: false},
             relations: ['issues'],
         });
         if (!user) {
             throw new NotFoundException(`User with id ${id} not found`);
-        }
-        return user;
-    }
-
-    async getUserByEmail(email: string) {
-        const user = await this.usersRepository.findOne({
-            where: {email},
-            relations: ['issues'],
-        });
-        if (!user) {
-            throw new NotFoundException(`User with email ${email} not found`);
         }
         return user;
     }

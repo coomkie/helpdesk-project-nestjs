@@ -1,10 +1,13 @@
-import {Body, Controller, Delete, Get, Param, Patch, Post, Query} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards} from '@nestjs/common';
 import {UsersService} from "./users.service";
 import {Users} from "./users.entity";
 import {UpdateUserRequest} from "./dto/request/update-user-request";
 import {CreateUserRequest} from "./dto/request/create-user-request";
 import {UserLoginRequest} from "./dto/response/user-login-request";
 import {AuthService} from "../auth/auth.service";
+import {JwtAuthGuard} from "../auth/jwt-auth.guard";
+import {RolesGuard} from "../auth/roles.guard";
+import {Roles} from "../auth/roles.decorator";
 
 @Controller('users')
 export class UsersController {
@@ -15,6 +18,8 @@ export class UsersController {
     }
 
     @Get()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
     getAllUser(
         @Query('page') page = 1,
         @Query('pageSize') pageSize = 10,
@@ -31,22 +36,36 @@ export class UsersController {
         });
     }
 
+    @Get('profile')
+    @UseGuards(JwtAuthGuard)
+    getProfile(@Req() req: any) {
+        return req.user;
+    }
+
     @Get(':id')
+    @UseGuards(JwtAuthGuard)
     GetUserById(@Param('id') id: string) {
         return this.userService.getUserById(id);
     }
 
+
     @Post()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
     createUser(@Body() body: CreateUserRequest) {
         return this.userService.createUser(body);
     }
 
     @Patch(':id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
     UpdateUser(@Param('id') id: string, @Body() body: UpdateUserRequest) {
         return this.userService.updateUser(id, body);
     }
 
     @Delete(':id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
     DeleteUser(@Param('id') id: string) {
         return this.userService.deleteUser(id);
     }
